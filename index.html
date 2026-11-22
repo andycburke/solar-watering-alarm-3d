@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar watering alarm: 3D view</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #e9ecef; font-family: system-ui, sans-serif; color: #222; }
+  model-viewer { width: 100%; height: 100%; background: linear-gradient(#f4f5f7, #d5d9de); }
+  .note { position: fixed; left: 16px; bottom: 14px; font-size: 14px; background: rgba(255,255,255,.8); padding: 6px 10px; border-radius: 6px; }
+  @media (prefers-color-scheme: dark) {
+    html, body { background: #1c1e21; color: #eee; }
+    model-viewer { background: linear-gradient(#3a3d42, #1c1e21); }
+    .note { background: rgba(0,0,0,.55); }
+  }
+</style>
+</head>
+<body>
+<model-viewer src="solar_alarm.glb" alt="3D model of the solar watering alarm circuit board"
+  camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
+  camera-orbit="35deg 60deg auto" shadow-intensity="0.6" exposure="1.1" interaction-prompt="none"></model-viewer>
+<div class="note">Drag to rotate · scroll or pinch to zoom · two fingers or right-drag to move</div>
+</body>
+</html>
