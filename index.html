@@ -18,18 +18,27 @@
   camera-orbit="35deg 60deg auto" shadow-intensity="0.5" exposure="0.85" tone-mapping="commerce" interaction-prompt="none"></model-viewer>
 <div class="note">Drag to rotate · scroll or pinch to zoom · two fingers or right-drag to move</div>
 <script>
-  // KiCad exports the black coverlay partly see-through and slightly glossy, so under the viewer's bright
-  // surroundings the board reads grey. Find it (the only dark, colourless, see-through material) and make it
-  // opaque, matt black. Part bodies and the brown solar panel are left as they are.
+  // KiCad's export does not carry the board's real finishes, so three materials are corrected here.
+  // Each is found by the colour KiCad gives it, since the export does not name them.
+  //  - Coverlay: dark, colourless and partly see-through. Made opaque, matt black, or it reads grey.
+  //  - Exposed copper (pads and the logo's leaf): mid grey. The board is ENIG, so it is gold.
+  //  - Silkscreen: near white. Lit from within, so it is as white on the underside as on top.
   document.getElementById("mv").addEventListener("load", (e) => {
     for (const m of e.target.model.materials) {
-      const [r, g, b, a] = m.pbrMetallicRoughness.baseColorFactor;
-      const hi = Math.max(r, g, b), lo = Math.min(r, g, b);
-      if (hi < 0.3 && hi - lo < 0.03 && a < 0.99) {
+      const pbr = m.pbrMetallicRoughness;
+      const [r, g, b, a] = pbr.baseColorFactor;
+      const hi = Math.max(r, g, b), lo = Math.min(r, g, b), grey = hi - lo < 0.03;
+      if (grey && hi < 0.3 && a < 0.99) {                              // coverlay
         m.setAlphaMode("OPAQUE");
-        m.pbrMetallicRoughness.setBaseColorFactor([0, 0, 0, 1]);
-        m.pbrMetallicRoughness.setMetallicFactor(0);
-        m.pbrMetallicRoughness.setRoughnessFactor(1);
+        pbr.setBaseColorFactor([0, 0, 0, 1]);
+        pbr.setMetallicFactor(0);
+        pbr.setRoughnessFactor(1);
+      } else if (grey && Math.abs(hi - 0.5) < 0.03 && pbr.metallicFactor > 0.5) {   // exposed copper: ENIG gold
+        pbr.setBaseColorFactor([0.92, 0.7, 0.24, 1]);
+        pbr.setRoughnessFactor(0.4);
+      } else if (grey && lo > 0.9 && pbr.metallicFactor < 0.5) {       // silkscreen
+        pbr.setBaseColorFactor([1, 1, 1, 1]);
+        m.setEmissiveFactor([0.85, 0.85, 0.85]);
       }
     }
   });
