@@ -6,20 +6,33 @@
 <title>Solar watering alarm: 3D view</title>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <style>
-  html, body { margin: 0; height: 100%; background: #e9ecef; font-family: system-ui, sans-serif; color: #222; }
-  model-viewer { width: 100%; height: 100%; background: linear-gradient(#f4f5f7, #d5d9de); }
-  .note { position: fixed; left: 16px; bottom: 14px; font-size: 14px; background: rgba(255,255,255,.8); padding: 6px 10px; border-radius: 6px; }
-  @media (prefers-color-scheme: dark) {
-    html, body { background: #1c1e21; color: #eee; }
-    model-viewer { background: linear-gradient(#3a3d42, #1c1e21); }
-    .note { background: rgba(0,0,0,.55); }
-  }
+  /* White background in every colour scheme (user, 2026-11-23). */
+  html, body { margin: 0; height: 100%; background: #fff; font-family: system-ui, sans-serif; color: #222; }
+  model-viewer { width: 100%; height: 100%; background: #fff; }
+  .note { position: fixed; left: 16px; bottom: 14px; font-size: 14px; background: rgba(255,255,255,.85); padding: 6px 10px; border-radius: 6px; border: 1px solid #ddd; }
 </style>
 </head>
 <body>
-<model-viewer src="solar_alarm.glb" alt="3D model of the solar watering alarm circuit board"
+<model-viewer id="mv" src="solar_alarm.glb" alt="3D model of the solar watering alarm circuit board"
   camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
-  camera-orbit="35deg 60deg auto" shadow-intensity="0.6" exposure="1.1" interaction-prompt="none"></model-viewer>
+  camera-orbit="35deg 60deg auto" shadow-intensity="0.5" exposure="0.85" tone-mapping="commerce" interaction-prompt="none"></model-viewer>
 <div class="note">Drag to rotate · scroll or pinch to zoom · two fingers or right-drag to move</div>
+<script>
+  // KiCad exports the black coverlay partly see-through and slightly glossy, so under the viewer's bright
+  // surroundings the board reads grey. Find it (the only dark, colourless, see-through material) and make it
+  // opaque, matt black. Part bodies and the brown solar panel are left as they are.
+  document.getElementById("mv").addEventListener("load", (e) => {
+    for (const m of e.target.model.materials) {
+      const [r, g, b, a] = m.pbrMetallicRoughness.baseColorFactor;
+      const hi = Math.max(r, g, b), lo = Math.min(r, g, b);
+      if (hi < 0.3 && hi - lo < 0.03 && a < 0.99) {
+        m.setAlphaMode("OPAQUE");
+        m.pbrMetallicRoughness.setBaseColorFactor([0, 0, 0, 1]);
+        m.pbrMetallicRoughness.setMetallicFactor(0);
+        m.pbrMetallicRoughness.setRoughnessFactor(1);
+      }
+    }
+  });
+</script>
 </body>
 </html>
